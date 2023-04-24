@@ -4,7 +4,7 @@ import sqlite3
 conn = sqlite3.connect('mydatabase.db')
 # create a table for the data
 # conn.execute('''
-# CREATE TABLE faces
+ #CREATE TABLE faces
 # (
 #     name TEXT PRIMARY KEY,
 #     detection_time TEXT,

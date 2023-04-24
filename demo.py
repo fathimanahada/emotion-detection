@@ -7,7 +7,18 @@ import numpy as np
 import math
 from deepface import DeepFace
 from datetime import datetime
-import threading
+import sqlite3
+
+#connect to db
+conn = sqlite3.connect('employee.db')
+c=conn.cursor()
+conn.execute('''CREATE TABLE IF NOT EXISTS emotion (
+	     id INTEGER PRIMARY KEY AUTOINCREMENT,
+	     emp_name TEXT NOT NULL,
+	     dominant_emotion TEXT NOT NULL,
+         time_stamp TEXT
+        );
+         ''')
 
 # Helper
 def face_confidence(face_distance, face_match_threshold=0.6):
@@ -53,7 +64,7 @@ class FaceRecognition:
         face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
         video_capture = cv2.VideoCapture(0)
 
-        f = open('emotion_labels.txt', 'a')
+        # f = open('emotion_labels.txt', 'a')
 
         while True:
             current_time = datetime.now().strftime('%Y-%m-%d  %I:%M:%S')
@@ -111,9 +122,16 @@ class FaceRecognition:
                 result = DeepFace.analyze(frame,actions="emotion",enforce_detection=False)
                 dominant_emotion = result[0]['dominant_emotion']
                 print(dominant_emotion)
-                data= name+': '+current_time+': '+dominant_emotion
+                #insert into db
+                if name != 'Unknown':
+                #date = datetime.datetime.now().strftime("%Y-%m-%d")
+                 c.execute("INSERT INTO emotion(emp_name,dominant_emotion,time_stamp) VALUES (?, ?,?)", (name,dominant_emotion,current_time))
+                 #c.execute("SELECT * FROM emotion")
+                 conn.commit()
+                
+                #data= name+': '+current_time+': '+dominant_emotion
                 # Add data to the file
-                f.write(data+'\n')
+                #f.write(data+'\n')
                 cv2.putText(frame,dominant_emotion,(top, right-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
         
 
@@ -126,10 +144,12 @@ class FaceRecognition:
 
         
 
+       
         # Release handle to the webcam
         video_capture.release()
         cv2.destroyAllWindows()
-        f.close()
+        conn.close()
+        
 
 
 if __name__ == '__main__':
