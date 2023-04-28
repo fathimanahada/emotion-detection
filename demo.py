@@ -7,18 +7,6 @@ import numpy as np
 import math
 from deepface import DeepFace
 from datetime import datetime
-import sqlite3
-
-#connect to db
-conn = sqlite3.connect('employee.db')
-c=conn.cursor()
-conn.execute('''CREATE TABLE IF NOT EXISTS emotion (
-	     id INTEGER PRIMARY KEY AUTOINCREMENT,
-	     emp_name TEXT NOT NULL,
-	     dominant_emotion TEXT NOT NULL,
-         time_stamp TEXT
-        );
-         ''')
 
 # Helper
 def face_confidence(face_distance, face_match_threshold=0.6):
@@ -126,8 +114,8 @@ class FaceRecognition:
                 if name != 'Unknown':
                 #date = datetime.datetime.now().strftime("%Y-%m-%d")
                  c.execute("INSERT INTO emotion(emp_name,dominant_emotion,time_stamp) VALUES (?, ?,?)", (name,dominant_emotion,current_time))
-                 #c.execute("SELECT * FROM emotion")
-                 conn.commit()
+                
+                
                 
                 #data= name+': '+current_time+': '+dominant_emotion
                 # Add data to the file
@@ -148,7 +136,7 @@ class FaceRecognition:
         # Release handle to the webcam
         video_capture.release()
         cv2.destroyAllWindows()
-        conn.close()
+       
         
 
 
