@@ -7,6 +7,23 @@ import numpy as np
 import math
 from deepface import DeepFace
 from datetime import datetime
+from pymongo import MongoClient
+ 
+client = MongoClient("mongodb+srv://fathimanahada06:fnhd_681@cluster0.clnokkg.mongodb.net/?retryWrites=true&w=majority")
+#db
+db = client.get_database('emotion')
+#collection
+records = db.collection
+
+def add_data(name, time, dominant_emotion):
+    document = {
+        "Name": name,
+        "Time": time,
+        "Dominant_emotion": dominant_emotion
+    }
+    return records.insert_one(document)
+
+
 
 # Helper
 def face_confidence(face_distance, face_match_threshold=0.6):
@@ -113,9 +130,9 @@ class FaceRecognition:
                 #insert into db
                 if name != 'Unknown':
                 #date = datetime.datetime.now().strftime("%Y-%m-%d")
-                 c.execute("INSERT INTO emotion(emp_name,dominant_emotion,time_stamp) VALUES (?, ?,?)", (name,dominant_emotion,current_time))
+                 #c.execute("INSERT INTO emotion(emp_name,dominant_emotion,time_stamp) VALUES (?, ?,?)", (name,dominant_emotion,current_time))
                 
-                
+                  add_data(name,current_time,dominant_emotion)
                 
                 #data= name+': '+current_time+': '+dominant_emotion
                 # Add data to the file
