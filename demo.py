@@ -69,11 +69,10 @@ class FaceRecognition:
         face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
         video_capture = cv2.VideoCapture(0)
 
-        # f = open('emotion_labels.txt', 'a')
 
         while True:
             current_time = datetime.now().strftime('%Y-%m-%d  %I:%M:%S')
-
+            #for i in range(5):
             ret, frame = video_capture.read()
            
            
@@ -127,18 +126,11 @@ class FaceRecognition:
                 result = DeepFace.analyze(frame,actions="emotion",enforce_detection=False)
                 dominant_emotion = result[0]['dominant_emotion']
                 print(dominant_emotion)
-                #insert into db
-                if name != 'Unknown':
-                #date = datetime.datetime.now().strftime("%Y-%m-%d")
-                 #c.execute("INSERT INTO emotion(emp_name,dominant_emotion,time_stamp) VALUES (?, ?,?)", (name,dominant_emotion,current_time))
                 
-                  add_data(name,current_time,dominant_emotion)
-                
-                #data= name+': '+current_time+': '+dominant_emotion
-                # Add data to the file
-                #f.write(data+'\n')
+                add_data(name,current_time,dominant_emotion)
+
                 cv2.putText(frame,dominant_emotion,(top, right-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
-        
+                #time.sleep(900)
 
             # Display the resulting image
             cv2.imshow('Face Recognition', frame)
@@ -148,13 +140,11 @@ class FaceRecognition:
                 break
 
         
-
-       
+        #time.sleep(15)
         # Release handle to the webcam
         video_capture.release()
         cv2.destroyAllWindows()
        
-        
 
 
 if __name__ == '__main__':
