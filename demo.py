@@ -4,23 +4,26 @@ import os, sys
 import cv2
 import numpy as np
 import math
+import collections
 from deepface import DeepFace
 from datetime import datetime
 from pymongo import MongoClient
- 
-# client = MongoClient("mongodb+srv://fathimanahada06:fnhd_681@cluster0.clnokkg.mongodb.net/?retryWrites=true&w=majority")
-# #db
-# db = client.get_database('emotion')
-# #collection
-# records = db.collection
 
-# def add_data(name, time, dominant_emotion):
-#     document = {
-#         "Name": name,
-#         "Time": time,
-#         "Dominant_emotion": dominant_emotion
-#     }
-#     return records.insert_one(document)
+ 
+client = MongoClient("mongodb+srv://fathimanahada06:fnhd_681@cluster0.clnokkg.mongodb.net/?retryWrites=true&w=majority")
+ #db
+db = client.get_database('emotion')
+#collection
+records = db.collection
+
+def add_data(name, time, avg_emotion):
+     document = {
+         "Name": name,
+         "Time": time,
+         #"Dominant_emotion": dominant_emotion,
+         "Average_emotion": avg_emotion
+     }
+     return records.insert_one(document)
 
 
 
@@ -44,11 +47,12 @@ class FaceRecognition:
     known_face_encodings = []
     known_face_names = []
     process_current_frame = True
+    
+
 
     def __init__(self):
         self.encode_faces()
-    # create a flag variable to keep track of whether an employee has been recognized
-    employee_recognized = False
+        self.employee_recognized = False 
 
     def encode_faces(self):
         for image in os.listdir('faces'):
@@ -69,11 +73,20 @@ class FaceRecognition:
     def run_recognition(self):
         face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
         video_capture = cv2.VideoCapture(0)
+        #
+        # f = open('labels.txt', 'a')
+        start_time = time.time()
+        session_duration = 15
+        exp_time =  start_time + float(session_duration)
+        emotion_count = 0
+        emotion_list = []
 
-        f = open('recognition.txt', 'a')
 
         while True:
             current_time = datetime.now().strftime('%Y-%m-%d  %I:%M:%S')
+            if time.time() >= exp_time:
+                print("Session expired")
+                break
 
             ret, frame = video_capture.read()
            
@@ -117,48 +130,65 @@ class FaceRecognition:
                 right *= 4
                 bottom *= 4
                 left *= 4
-            # check if the current face matches any of the known faces
-                if True in matches:
-            # find the index of the first match and use it to get the name of the employee
-                        first_match_index = matches.index(True)
-                        name = self.known_face_names[first_match_index]
-                        f.write(name +'\n')
+
             
-            # check if the employee has already been recognized in this session
-                else:
-                    
-                # set the flag variable to True to indicate that the employee has been recognized
-                    employee_recognized = True
                 
-                # do something with the recognized employee, such as displaying their name or logging their presence
-                    print("Employee recognized: {}".format(name))
-                    
-             # set the flag variable to False to indicate that the employee has not been recognized
-            #            employee_recognized = False
+
                  # Create the frame with the name
                 cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
                 cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
-                #cv2.putText(frame,(left + 6, bottom - 6), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)
-    
+                #cv2.putText(frame, name, (left + 6, bottom - 6), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)
+                def check()  : 
+                 # check if the current face matches any of the known faces
+                 if True in matches:
+                # find the index of the first match and use it to get the name of the employee
+                        first_match_index = matches.index(True)
+                        name = self.known_face_names[first_match_index]
+                        
+                        
+               
+                        
+                # do something with the recognized employee, such as displaying their name or logging their presence
+                if not self.employee_recognized :
+                    if records.count_documents({'Name': name}) > 0:
+                            print('Employee already recognized: {}'.format(name))
+                            break
+                            # do something with the existing employee, such as updating their information
+                    else:
+                            print('New employee recognized: {}'.format(name))
+                        # print("Employee recognized: {}".format(name))
+                            self.employee_recognized =True
+                            
+                   
+                else:
+                        self.employee_recognized = False
+                        
         # Add the emotion label to the image
             
                 result = DeepFace.analyze(frame,actions="emotion",enforce_detection=False)
                 dominant_emotion = result[0]['dominant_emotion']
                 print(dominant_emotion)
-                # #insert into db
-                # if name != 'Unknown':
+                #insert into db
+                if name != 'Unknown':
+                 
+                 
                 #date = datetime.datetime.now().strftime("%Y-%m-%d")
                  #c.execute("INSERT INTO emotion(emp_name,dominant_emotion,time_stamp) VALUES (?, ?,?)", (name,dominant_emotion,current_time))
                 
-                  #add_data(name,current_time,dominant_emotion)
+                #  add_data(name,current_time,dominant_emotion)
                 
-                data= current_time+': '+dominant_emotion
-                # Add data to the file
-                f.write(data+'\n')
-                #cv2.putText(frame,dominant_emotion,(top, right-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
-                cv2.putText(frame,dominant_emotion,(left + 6, bottom - 6), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)
+                 data= current_time+': '+dominant_emotion
+                 #Add data to the file
+                # f.write( data +' \n')
+               
+                cv2.putText(frame,dominant_emotion,(left + 6, bottom - 6), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)    
+               
+                emotion_list.append(dominant_emotion)
+                # Increment the emotion counter
+                emotion_count += 1
 
-        
+               
+                            
 
             # Display the resulting image
             cv2.imshow('Face Recognition', frame)
@@ -166,6 +196,13 @@ class FaceRecognition:
             # Hit 'q' on the keyboard to quit!
             if cv2.waitKey(1) & 0xff == ord('q'):
                 break
+            if emotion_count >= 10 :
+                break
+        avg_emotion = collections.Counter(emotion_list).most_common(1)[0][0]
+                # print("Average Emotion:", avg_emotion)
+        # f.write(name +'\n')
+        # f.write("Average Emotion: " + str(avg_emotion) + "\n")
+        add_data(name,current_time,avg_emotion)
 
         
 
@@ -173,11 +210,11 @@ class FaceRecognition:
         # Release handle to the webcam
         video_capture.release()
         cv2.destroyAllWindows()
-        f.close()
+        
         
 
 
 if __name__ == '__main__':
     fr = FaceRecognition()
     fr.run_recognition()
-
+    

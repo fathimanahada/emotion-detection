@@ -1,0 +1,22 @@
+Nahada.png
+Nahada.png
+2023-05-08  04:04:19: angry 
+Nahada.png
+2023-05-08  04:04:22: happy 
+Unknown (???)
+2023-05-08  04:04:23: happy 
+Unknown (???)
+2023-05-08  04:04:24: fear 
+Unknown (???)
+2023-05-08  04:04:24: happy 
+Unknown (???)
+2023-05-08  04:04:25: happy 
+Nahada.png
+2023-05-08  04:04:26: happy 
+Nahada.png
+2023-05-08  04:04:27: happy 
+Nahada.png
+2023-05-08  04:04:28: sad 
+Nahada.png
+2023-05-08  04:04:28: fear 
+Average Emotion: happy
