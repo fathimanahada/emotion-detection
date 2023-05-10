@@ -6,10 +6,11 @@ db = client.get_database('emotion')
 #collection
 records = db.collection
 
-def add_data(name, time, dominant_emotion):
-    document = {
-        "Name": name,
-        "Time": time,
-        "Dominant_emotion": dominant_emotion
-    }
-    return records.insert_one(document)
+# def add_data(name, time, dominant_emotion):
+#     document = {
+#         "Name": name,
+#         "Time": time,
+#         "Dominant_emotion": dominant_emotion
+#     }
+#     return records.insert_one(document)
+records.delete_many({})
