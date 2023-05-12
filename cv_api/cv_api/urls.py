@@ -20,6 +20,6 @@ from face_recognizer import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('face_recognition/',views.detect)
+    path('face_recognition/',views.facedetect)
 
 ]

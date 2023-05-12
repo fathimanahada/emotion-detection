@@ -17,11 +17,11 @@ from pymongo import MongoClient
 FACE_DETECTOR_PATH = "{base_path}/cascades/haarcascade_frontalface_default.xml".format(
 	base_path=os.path.abspath(os.path.dirname(__file__)))
 @csrf_exempt
-def detect(request):
+def facedetect(request):
 	# initialize the data dictionary to be returned by the request
 	data = {"success": False}
 	# check to see if this is a post request
-	if request.method == "POST":
+	if request.method == "GET":
 		# check to see if an image was uploaded
 		if request.FILES.get("image", None) is not None:
 			# grab the uploaded image
